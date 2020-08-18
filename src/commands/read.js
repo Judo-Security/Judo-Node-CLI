@@ -4,29 +4,9 @@ const aes256 = require('../aes256gcm');
 const logger = require('../utils/logger');
 const judo = require('../judofile');
 const getShards = require('../services/getShards');
+const readOutputFile = require('../utils/helper');
 
-function readOutputFile(secretType, outputFile, forceOverwrite) {
-  return new Promise((resolve, reject) => {
-    if (secretType === 2 && outputFile && outputFile.length > 0) {
-      return fs.access(outputFile, fs.constants.F_OK, (err) => {
-        if (err) {
-          // file doesn't exist
-          resolve();
-        } else {
-          if (forceOverwrite) {
-            resolve();
-          } else {
-            reject('Output file already exists. Use --force to overwrite the destination file.');
-          }
-        }
-      });
-    } else {
-      resolve();
-    }
-  });
-}
-
-function read({ storageKey, inputFile, forceOverwrite, verbose }) {
+function read({ storageKey, inputFile, verbose }) {
   const startTime = new Date();
   logger.log(`Reading Judo file: ${inputFile}`, logger.MESSAGE_TYPE.WARN, verbose);
 
@@ -40,7 +20,7 @@ function read({ storageKey, inputFile, forceOverwrite, verbose }) {
   const outputFile = judoFile.filename;
   const secretType = judoFile.type;
   // if we have an outputfile defined, let's see if it already exists.
-  readOutputFile(secretType, outputFile, forceOverwrite).then(() => {
+  readOutputFile({secretType, outputFile}).then(fileName => {
     // download the shards
     logger.log('Downloading shards.', logger.MESSAGE_TYPE.INFO, verbose);
     getShards(judoFile.secretId, judoFile.shardUrls, storageKey).then((results) => {
@@ -57,11 +37,11 @@ function read({ storageKey, inputFile, forceOverwrite, verbose }) {
 
         if (secretType === 2 && outputFile && outputFile.length > 0) {
           // write file
-          fs.writeFile(outputFile, decryptedText, function (err) {
+          fs.writeFile(fileName, decryptedText, function (err) {
             if (err) {
               logger.log(err.message, logger.MESSAGE_TYPE.ERROR, verbose);
             }
-            logger.log(`Output writted to: ${outputFile}`, logger.MESSAGE_TYPE.LOG, verbose);
+            logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
           });
         } else {
           // log the decrypted text
