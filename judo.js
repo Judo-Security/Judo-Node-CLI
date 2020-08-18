@@ -59,8 +59,7 @@ if (create) {
 else if (read) {
   // read judo file
   const verbose = args.verbose;
-  const force = args.force;
-  Read({ storageKey, inputFile: read, forceOverwrite: force, verbose });
+  Read({ storageKey, inputFile: read, verbose });
 } else if (expire) {
   // Expire a secret immediately.
   Expire(storageKey, expire);

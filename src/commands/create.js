@@ -8,6 +8,7 @@ const judo = require('../judofile');
 const reserveSecret = require('../services/reserveSecret');
 const fillShards = require('../services/fillShardsService');
 const fulfillSecret = require('../services/fulfillSecret');
+const readOutputFile = require('../utils/helper');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
@@ -77,7 +78,9 @@ function create({storageKey, organizationId, secretName, outputFile, input, inpu
           data:encryptedDataObj
         });
         if (judoFile) {
-            judoFile.write(outputFile);
+            readOutputFile({outputFile}).then( (fileName) => {
+              judoFile.write(fileName);
+            })
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;

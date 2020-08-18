@@ -58,7 +58,6 @@ Delete an existing Judo secret:
 --inputfile=<filename>    Secret file to be secured.
 --ip="192.168.1.1"        White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
 --machine="computer name"\t\tWhite list machine name. Note: to specify more than one machine name, use the --machine switch more than once.--outputfile=<filename>   Judo file output.
---force                   Overwrite file if file exists when attempting to recreate secret.
 --verbose                 Display verbose information. Mostly useful when used in conjunction with -r.
 -c "secret name"          Create judo file.
 -r "input.judo"           Read judo file.
