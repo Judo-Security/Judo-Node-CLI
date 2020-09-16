@@ -20,7 +20,7 @@ function read({ storageKey, inputFile, verbose }) {
   const outputFile = judoFile.filename;
   const secretType = judoFile.type;
   // if we have an outputfile defined, let's see if it already exists.
-  readOutputFile({secretType, outputFile}).then(fileName => {
+  readOutputFile({ secretType, outputFile }).then(fileName => {
     // download the shards
     logger.log('Downloading shards.', logger.MESSAGE_TYPE.INFO, verbose);
     getShards(judoFile.secretId, judoFile.shardUrls, storageKey).then((results) => {
@@ -36,13 +36,14 @@ function read({ storageKey, inputFile, verbose }) {
         const decryptedText = Buffer.from(decryptedData, 'base64');
 
         if (secretType === 2 && outputFile && outputFile.length > 0) {
+          logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
           // write file
-          fs.writeFile(fileName, decryptedText, function (err) {
-            if (err) {
-              logger.log(err.message, logger.MESSAGE_TYPE.ERROR, verbose);
-            }
-            logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
-          });
+          // fs.writeFile(fileName, decryptedText, function (err) {
+          //   if (err) {
+          //     logger.log(err.message, logger.MESSAGE_TYPE.ERROR, verbose);
+          //   }
+          //   logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
+          // });
         } else {
           // log the decrypted text
           logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
