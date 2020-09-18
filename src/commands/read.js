@@ -5,18 +5,24 @@ const logger = require('../utils/logger');
 const judo = require('../judofile');
 const getShards = require('../services/getShards');
 const readOutputFile = require('../utils/helper');
+const retrieveFromS3 = require('../services/retrieveFromS3');
 
-function read({ storageKey, inputFile, verbose }) {
+
+async function read({ storageKey, inputFile, cloudStorage, bucketName, verbose }) {
   const startTime = new Date();
   logger.log(`Reading Judo file: ${inputFile}`, logger.MESSAGE_TYPE.WARN, verbose);
-
-  // read the JUDO file
-  let judoFile = judo.readJudoFile(inputFile);
-  if (!judoFile) {
-    logger.log('There was a problem reading your judo file.', logger.MESSAGE_TYPE.ERROR, verbose);
-    return;
+  let judoFile;
+  if (cloudStorage) {
+    judoFile = await retrieveFromS3({ inputFile, bucketName });
   }
-
+  else {
+    judoFile = judo.readJudoFile(inputFile);
+    if (!judoFile) {
+      logger.log('There was a problem reading your judo file.', logger.MESSAGE_TYPE.ERROR, verbose);
+      return;
+    }
+  }
+  // read the JUDO file
   const outputFile = judoFile.filename;
   const secretType = judoFile.type;
   // if we have an outputfile defined, let's see if it already exists.
@@ -34,7 +40,6 @@ function read({ storageKey, inputFile, verbose }) {
         // decrypt the data using the dek
         const decryptedData = aes256.decrypt(Buffer.from(decryptedDek, 'base64'), judoFile.data);
         const decryptedText = Buffer.from(decryptedData, 'base64');
-
         if (secretType === 2 && outputFile && outputFile.length > 0) {
           // write file
           fs.writeFile(fileName, decryptedText, function (err) {

@@ -9,12 +9,13 @@ const reserveSecret = require('../services/reserveSecret');
 const fillShards = require('../services/fillShardsService');
 const fulfillSecret = require('../services/fulfillSecret');
 const readOutputFile = require('../utils/helper');
+const uploadToS3 = require('../services/uploadToS3');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames}) {
-  const startTime = new Date();
+function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, cloudStorage, bucketName }) {
 
+  const startTime = new Date();
   // validate IPs
   let allIPsAreValid = true;
   for (let i = 0; i < allowedIPs.length; i++) {
@@ -66,21 +67,26 @@ function create({storageKey, organizationId, secretName, outputFile, input, inpu
       fulfillSecret(response.secretId, storageKey).then(() => {
         logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
         let judoFile = new judo.JudoFile({
-          version:1,
-          type:secretType,
-          filename:secretFilename,
-          name:secretName,
-          secret_id:response.secretId,
-          index:response.urls,
-          n:numberOfShards,
-          m:numberRequired,
-          wrapped_key:encrypedDekObj,
-          data:encryptedDataObj
+          version: 1,
+          type: secretType,
+          filename: secretFilename,
+          name: secretName,
+          secret_id: response.secretId,
+          index: response.urls,
+          n: numberOfShards,
+          m: numberRequired,
+          wrapped_key: encrypedDekObj,
+          data: encryptedDataObj
         });
         if (judoFile) {
-            readOutputFile({outputFile}).then( (fileName) => {
+          if (cloudStorage) {
+            uploadToS3({ judoFile, outputFile, bucketName });
+          }
+          else {
+            readOutputFile({ outputFile }).then((fileName) => {
               judoFile.write(fileName);
             })
+          }
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;
