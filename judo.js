@@ -34,6 +34,7 @@ if (create) {
   const allowedIPs = ipArgs && ((typeof ipArgs === 'string') ? [ipArgs] : ipArgs) || [];
   const machineArgs = args.machine;
   const machineNames = machineArgs && ((typeof machineArgs === 'string') ? [machineArgs] : machineArgs) || [];
+  const region = {};
   if (!outputFile || !(input || inputFile) || !numberOfShards || !numberRequired) {
     if (!outputFile) console.log(instructions.outputFile);
     if (!input || !inputFile) console.log(instructions.inputFile);
@@ -53,7 +54,8 @@ if (create) {
     numberRequired,
     expiration,
     allowedIPs,
-    machineNames
+    machineNames,
+    region
   });
 }
 else if (read) {
