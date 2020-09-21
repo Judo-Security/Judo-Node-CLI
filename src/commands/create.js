@@ -12,7 +12,7 @@ const readOutputFile = require('../utils/helper');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames}) {
+function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, region }) {
   const startTime = new Date();
 
   // validate IPs
@@ -59,28 +59,28 @@ function create({storageKey, organizationId, secretName, outputFile, input, inpu
   const stringShares = shares.map(share => share.toString('hex'));
 
   logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
-  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, organizationId, storageKey).then((response) => {
+  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, region, organizationId, storageKey).then((response) => {
     logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
     fillShards(response.secretId, response.urls, stringShares, storageKey).then(() => {
       logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, true);
       fulfillSecret(response.secretId, storageKey).then(() => {
         logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
         let judoFile = new judo.JudoFile({
-          version:1,
-          type:secretType,
-          filename:secretFilename,
-          name:secretName,
-          secret_id:response.secretId,
-          index:response.urls,
-          n:numberOfShards,
-          m:numberRequired,
-          wrapped_key:encrypedDekObj,
-          data:encryptedDataObj
+          version: 1,
+          type: secretType,
+          filename: secretFilename,
+          name: secretName,
+          secret_id: response.secretId,
+          index: response.urls,
+          n: numberOfShards,
+          m: numberRequired,
+          wrapped_key: encrypedDekObj,
+          data: encryptedDataObj
         });
         if (judoFile) {
-            readOutputFile({outputFile}).then( (fileName) => {
-              judoFile.write(fileName);
-            })
+          readOutputFile({ outputFile }).then((fileName) => {
+            judoFile.write(fileName);
+          })
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;
