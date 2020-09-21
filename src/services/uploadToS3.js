@@ -10,11 +10,6 @@ const credentials = {
   secretAccessKey: process.env.S3_SECRET_KEY
 };
 
-aws.config.update({
-  credentials: credentials,
-  region: process.env.S3_REGION,
-});
-
 var s3 = new aws.S3();
 
 function uploadToS3({ judoFile, outputFile, bucketName }) {
@@ -31,7 +26,7 @@ function uploadToS3({ judoFile, outputFile, bucketName }) {
       'Content-Type': 'application/json',
     }
   })
-    .then(res => console.log(res))
+    .then(res => logger.log('File uploaded to S3 successfully', logger.MESSAGE_TYPE.LOG, true))
     .catch(CheckForError);
 }
 

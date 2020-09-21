@@ -10,10 +10,6 @@ const credentials = {
   secretAccessKey: process.env.S3_SECRET_KEY
 };
 
-aws.config.update({
-  credentials: credentials,
-  region: process.env.S3_REGION,
-});
 
 var s3 = new aws.S3();
 

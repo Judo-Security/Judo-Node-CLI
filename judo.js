@@ -13,7 +13,7 @@ const { exit } = require('process');
 if (!fs.existsSync('./.env')) {
   console.log('ENV file does not exist');
   console.log('Creating ENV File');
-  execShellCommand('aws.sh').then(() => {
+  execShellCommand('./aws.sh').then(() => {
     console.log('ENV File now created');
     exit(0);
   });
