@@ -86,7 +86,7 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
               judoFile.write(outputFile);
             })
           }
-          logger.log(stringifyJudo, MESSAGE_TYPE.INFO, true);
+          logger.log(stringifyJudo, logger.MESSAGE_TYPE.INFO, true);
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;
