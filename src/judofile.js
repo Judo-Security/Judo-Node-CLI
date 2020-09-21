@@ -2,7 +2,7 @@ const fs = require('fs');
 const logger = require('./utils/logger');
 
 class JudoFile {
-  constructor({version, type, filename = '', name, secret_id, index, n, m, wrapped_key, data}) {
+  constructor({ version, type, filename = '', name, secret_id, index, n, m, wrapped_key, data }) {
     this.version = version;         // Judo file version number
     this.type = type;               // Input type: 1=text 2=file
     this.filename = filename;       // Input filename (if needed)
@@ -69,7 +69,7 @@ class JudoFile {
           logger.log(err.message, logger.MESSAGE_TYPE.ERROR, true);
         }
 
-        logger.log(`Judo file has been saved to ${filename}.`, logger.MESSAGE_TYPE.INFO, true);
+        // logger.log(`Judo file has been saved to ${filename}.`, logger.MESSAGE_TYPE.INFO, true);
       });
     }
   }

@@ -10,7 +10,7 @@ const Expire = require('./src/commands/expire');
 const Delete = require('./src/commands/delete');
 
 const args = parseArgs(process.argv.slice(2), {
-  string: ['c', 'r', 'input', 'inputfile', 'outputfile', 'ip', 'machine'],
+  string: ['c', 'r', 'input', 'inputfile', 'outputfile', 'ip', 'machine', 'local'],
   boolean: ['verbose']
 });
 
@@ -19,6 +19,7 @@ const create = args.c;
 const read = args.r;
 const expire = args.expire;
 const del = args.delete;
+const local = args.local !== undefined ? true : false;
 
 const { storageKey, organizationId } = configReader(configArg);
 
@@ -34,14 +35,15 @@ if (create) {
   const allowedIPs = ipArgs && ((typeof ipArgs === 'string') ? [ipArgs] : ipArgs) || [];
   const machineArgs = args.machine;
   const machineNames = machineArgs && ((typeof machineArgs === 'string') ? [machineArgs] : machineArgs) || [];
-  if (!outputFile || !(input || inputFile) || !numberOfShards || !numberRequired) {
-    if (!outputFile) console.log(instructions.outputFile);
+  if ((local && !outputFile) || !(input || inputFile) || !numberOfShards || !numberRequired) {
+    if(local && !outputFile) console.log(instructions.outputFile);
     if (!input || !inputFile) console.log(instructions.inputFile);
     if (!numberOfShards) console.log(instructions.numberOfShards);
     if (!numberRequired) console.log(instructions.numberRequired);
     console.log(instructions.help);
     return;
   }
+
   Create({
     storageKey,
     organizationId,
@@ -53,7 +55,8 @@ if (create) {
     numberRequired,
     expiration,
     allowedIPs,
-    machineNames
+    machineNames,
+    local
   });
 }
 else if (read) {

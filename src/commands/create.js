@@ -12,7 +12,7 @@ const readOutputFile = require('../utils/helper');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames}) {
+function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, local }) {
   const startTime = new Date();
 
   // validate IPs
@@ -27,7 +27,7 @@ function create({storageKey, organizationId, secretName, outputFile, input, inpu
   }
   if (!allIPsAreValid) return;
 
-  logger.log(`Creating Judo file: ${outputFile}`, logger.MESSAGE_TYPE.WARN, true);
+  // logger.log(`Creating Judo file: ${outputFile}`, logger.MESSAGE_TYPE.WARN, true);
 
   const secretInputFilename = (inputFile && inputFile.length > 0) ? inputFile : null;
   const secretType = (inputFile && inputFile.length > 0) ? 2 : 1;
@@ -58,33 +58,39 @@ function create({storageKey, organizationId, secretName, outputFile, input, inpu
   const shares = secrets.split(kekHex, { shares: numberOfShards, threshold: numberRequired });
   const stringShares = shares.map(share => share.toString('hex'));
 
-  logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
+  // logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
   reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, organizationId, storageKey).then((response) => {
-    logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
+    // logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
     fillShards(response.secretId, response.urls, stringShares, storageKey).then(() => {
-      logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, true);
+      // logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, true);
       fulfillSecret(response.secretId, storageKey).then(() => {
-        logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
-        let judoFile = new judo.JudoFile({
-          version:1,
-          type:secretType,
-          filename:secretFilename,
-          name:secretName,
-          secret_id:response.secretId,
-          index:response.urls,
-          n:numberOfShards,
-          m:numberRequired,
-          wrapped_key:encrypedDekObj,
-          data:encryptedDataObj
-        });
+        // logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
+        const jsonObject = {
+          created: new Date().toLocaleString(),
+          version: 1,
+          type: secretType,
+          filename: secretFilename,
+          name: secretName,
+          secret_id: response.secretId,
+          index: response.urls,
+          n: numberOfShards,
+          m: numberRequired,
+          wrapped_key: encrypedDekObj,
+          data: encryptedDataObj
+        };
+        let judoFile = new judo.JudoFile(jsonObject);
         if (judoFile) {
-            readOutputFile({outputFile}).then( (fileName) => {
-              judoFile.write(fileName);
+          const stringifyJudo = JSON.stringify(jsonObject, null, 4);
+          if (local) {
+            readOutputFile({ outputFile }).then((fileName) => {
+              judoFile.write(outputFile);
             })
+          }
+          logger.log(stringifyJudo, MESSAGE_TYPE.INFO, true);
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;
-        logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, true)
+        // logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, true)
       }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));
     }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));
   }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));

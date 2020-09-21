@@ -41,7 +41,8 @@ function read({ storageKey, inputFile, verbose }) {
             if (err) {
               logger.log(err.message, logger.MESSAGE_TYPE.ERROR, verbose);
             }
-            logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
+            logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
+            // logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
           });
         } else {
           // log the decrypted text
