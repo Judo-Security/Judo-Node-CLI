@@ -35,7 +35,7 @@ function read({ storageKey, inputFile, verbose }) {
         const decryptedData = aes256.decrypt(Buffer.from(decryptedDek, 'base64'), judoFile.data);
         const decryptedText = Buffer.from(decryptedData, 'base64');
 
-        logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
+        logger.log(decryptedText.toString('utf8'), logger.MESSAGE_TYPE.INFO, true);
         // log the time taken
         const timeTaken = new Date() - startTime;
         logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, verbose)
