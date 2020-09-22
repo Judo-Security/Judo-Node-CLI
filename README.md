@@ -48,19 +48,31 @@ Expire an existing Judo secret:
 Delete an existing Judo secret:
 	judo --delete "input.judo"
 
---config="client.json" 	The location of the client config file.
---expire "input.judo" 	expire a secret.
---delete "input.judo" 	delete an expired secret.
---input="secret string" Secret string to be secured.
---inputfile=<filename> 	Secret file to be secured.
---ip="192.168.1.1" 		  White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
---machine="computer name" 	  White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
---verbose 				      Display verbose information. Mostly useful when used in conjunction with -r.
--c "secret name" 		    Create judo file.
--r "input.judo" 		    Read judo file.
--n <number> 			      Number of shards.
--m <number> 			      Number of shards required to make a quorum.
--e <minutes> 			      Expiration in minutes. 0 = unlimited.
+--config="client.json" 		The location of the client config file.
+
+--expire "input.judo" 		Expire a secret.
+
+--delete "input.judo" 		Delete an expired secret.
+
+--input="secret string" 	Secret string to be secured.
+
+--inputfile=<filename> 		Secret file to be secured.
+
+--ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
+
+--machine="computer name" 	White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
+
+--verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
+
+-c "secret name" 		Create judo file.
+
+-r "input.judo" 		Read judo file.
+
+-n <number> 			Number of shards.
+
+-m <number> 			Number of shards required to make a quorum.
+
+-e <minutes> 			Expiration in minutes. 0 = unlimited.
 ```
 
 **On secret creation, the created Judo file would be displayed on the STDOUT itself which the user can then pipe to any shell script to either store Judo file on cloud or on your local file system.**
