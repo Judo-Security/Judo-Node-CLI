@@ -1,4 +1,3 @@
-
 # Judo Node Client
 
 ### Requirements
@@ -6,12 +5,11 @@ Node is required to be installed to run the client tool.
 
 You can download NodeJS at the official [NodeJS website](https://nodejs.org).
 
-
 After you install it you can check that you have node installed by issuing the command:
+
 ```
 node -v
 ```
-
 
 ### Client Installation
 Use NPM to install the judo client globally.
@@ -30,40 +28,89 @@ This current version is setup to use `https://staging.judosecurity.com` service 
 If you need to configure the client to use a different endpoint you can either
 - Edit the `services.json` file located in your judo-node-client NPM installation location.
 *or*
-- Create your own `.json` config file and use it using the `--config="client.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl":  "https://staging.judosecurity.com"}`
+- Create your own `.json` config file and use it using the `--config="client.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl": "https://staging.judosecurity.com"}`
 
 ### Usage
 You can issue the command `judo` to see how to use the client. Here is an overview:
 ```
 Creating a new Judo file from an input string:
-  judo -c "name" --outputfile="output.judo" --input="secret" -n5 -m3 -e0
+	judo -c "name" --input="secret" -n5 -m3 -e0
 
 Creating a new Judo file from an input file:
-  judo -c "name" --outputfile="output.judo" --inputfile="input.txt" -n5 -m3 -e0
+	judo -c "name" --inputfile="input.txt" -n5 -m3 -e0
 
 Reading a Judo file:
-  judo -r "input.judo"
+	judo -r "input.judo"
 
 Expire an existing Judo secret:
-  judo --expire "input.judo"
+	judo --expire "input.judo"
 
 Delete an existing Judo secret:
-  judo --delete "input.judo"
+	judo --delete "input.judo"
+
+--config="client.json" 		The location of the client config file.
+
+--expire "input.judo" 		Expire a secret.
+
+--delete "input.judo" 		Delete an expired secret.
+
+--input="secret string" 	Secret string to be secured.
+
+--inputfile=<filename> 		Secret file to be secured.
+
+--ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
+
+--machine="computer name" 	White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
+
+--verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
+
+-c "secret name" 		Create judo file.
+
+-r "input.judo" 		Read judo file.
+
+-n <number> 			Number of shards.
+
+-m <number> 			Number of shards required to make a quorum.
+
+-e <minutes> 			Expiration in minutes. 0 = unlimited.
+```
+
+**On secret creation, the created Judo file would be displayed on the STDOUT itself which the user can then pipe to any shell script to either store Judo file on cloud or on your local file system.**
+
+**On secret retrieval, the decrypted Judo file output would be displayed on the STDOUT which user can pipe to any file.**
+
+Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
 
 
---config="client.json"    The location of the client config file.
---expire "input.judo"     expire a secret.
---delete "input.judo"     delete an expired secret.
---input="secret string"   Secret string to be secured.
---inputfile=<filename>    Secret file to be secured.
---ip="192.168.1.1"        White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
---machine="computer name"\t\tWhite list machine name. Note: to specify more than one machine name, use the --machine switch more than once.--outputfile=<filename>   Judo file output.
---verbose                 Display verbose information. Mostly useful when used in conjunction with -r.
--c "secret name"          Create judo file.
--r "input.judo"           Read judo file.
--n <number>               Number of shards.
--m <number>               Number of shards required to make a quorum.
--e <minutes>              Expiration in minutes. 0 = unlimited.
+Store Judo file to AWS S3:
+```
+JUDOFILE=$1
+BUCKETNAME=<your_aws_s3_bucketname>
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOS3=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from S3:
+```
+BUCKETNAME=<your_aws_s3-bucketname>
+FILENAME=$1
+SAVEFILEAS=$1
+GETFROMS3=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
+more $FILENAME | node judo -r $FILENAME
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
 ```
 ### Client removal
 ```

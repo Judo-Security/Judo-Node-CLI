@@ -10,7 +10,7 @@ const Expire = require('./src/commands/expire');
 const Delete = require('./src/commands/delete');
 
 const args = parseArgs(process.argv.slice(2), {
-  string: ['c', 'r', 'input', 'inputfile', 'outputfile', 'ip', 'machine'],
+  string: ['c', 'r', 'input', 'inputfile', 'ip', 'machine'],
   boolean: ['verbose']
 });
 
@@ -19,12 +19,12 @@ const create = args.c;
 const read = args.r;
 const expire = args.expire;
 const del = args.delete;
+const verbose = args.verbose;
 
 const { storageKey, organizationId } = configReader(configArg);
 
 if (create) {
   // create judo file
-  const outputFile = args.outputfile;
   const input = args.input;
   const inputFile = args.inputfile;
   const numberOfShards = args.n;
@@ -35,19 +35,19 @@ if (create) {
   const machineArgs = args.machine;
   const machineNames = machineArgs && ((typeof machineArgs === 'string') ? [machineArgs] : machineArgs) || [];
   const region = {};
-  if (!outputFile || !(input || inputFile) || !numberOfShards || !numberRequired) {
-    if (!outputFile) console.log(instructions.outputFile);
+
+  if (!(input || inputFile) || !numberOfShards || !numberRequired) {
     if (!input || !inputFile) console.log(instructions.inputFile);
     if (!numberOfShards) console.log(instructions.numberOfShards);
     if (!numberRequired) console.log(instructions.numberRequired);
     console.log(instructions.help);
     return;
   }
+
   Create({
     storageKey,
     organizationId,
     secretName: create,
-    outputFile,
     input,
     inputFile,
     numberOfShards,
@@ -55,12 +55,12 @@ if (create) {
     expiration,
     allowedIPs,
     machineNames,
-    region
+    region,
+    verbose
   });
 }
 else if (read) {
   // read judo file
-  const verbose = args.verbose;
   Read({ storageKey, inputFile: read, verbose });
 } else if (expire) {
   // Expire a secret immediately.

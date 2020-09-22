@@ -35,18 +35,7 @@ function read({ storageKey, inputFile, verbose }) {
         const decryptedData = aes256.decrypt(Buffer.from(decryptedDek, 'base64'), judoFile.data);
         const decryptedText = Buffer.from(decryptedData, 'base64');
 
-        if (secretType === 2 && outputFile && outputFile.length > 0) {
-          // write file
-          fs.writeFile(fileName, decryptedText, function (err) {
-            if (err) {
-              logger.log(err.message, logger.MESSAGE_TYPE.ERROR, verbose);
-            }
-            logger.log(`Output writted to: ${fileName}`, logger.MESSAGE_TYPE.LOG, verbose);
-          });
-        } else {
-          // log the decrypted text
-          logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
-        }
+        logger.log(decryptedText, logger.MESSAGE_TYPE.LOG, verbose);
         // log the time taken
         const timeTaken = new Date() - startTime;
         logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, verbose)
