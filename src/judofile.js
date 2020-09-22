@@ -51,25 +51,11 @@ class JudoFile {
 
   write(filename) {
     if (filename) {
-      const jsonObject = {
-        created: new Date().toLocaleString(),
-        version: this.version,
-        type: this.type,
-        filename: this.filename,
-        name: this.name,
-        secret_id: this.secretId,
-        index: this.shardUrls,
-        n: this.n,
-        m: this.m,
-        wrapped_key: this.wrappedKey,
-        data: this.data,
-      };
       fs.writeFile(filename, JSON.stringify(jsonObject, null, 4), function (err) {
         if (err) {
           logger.log(err.message, logger.MESSAGE_TYPE.ERROR, true);
         }
-
-        // logger.log(`Judo file has been saved to ${filename}.`, logger.MESSAGE_TYPE.INFO, true);
+        logger.log(`Judo file has been saved to ${filename}.`, logger.MESSAGE_TYPE.INFO, true);
       });
     }
   }

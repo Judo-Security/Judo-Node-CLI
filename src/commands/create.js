@@ -8,11 +8,10 @@ const judo = require('../judofile');
 const reserveSecret = require('../services/reserveSecret');
 const fillShards = require('../services/fillShardsService');
 const fulfillSecret = require('../services/fulfillSecret');
-const readOutputFile = require('../utils/helper');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, region }) {
+function create({ storageKey, organizationId, secretName, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, region, verbose }) {
   const startTime = new Date();
 
   // validate IPs
@@ -26,8 +25,7 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
     }
   }
   if (!allIPsAreValid) return;
-
-  // logger.log(`Creating Judo file: ${outputFile}`, logger.MESSAGE_TYPE.WARN, true);
+  logger.log(`Creating Judo file`, logger.MESSAGE_TYPE.WARN, verbose);
 
   const secretInputFilename = (inputFile && inputFile.length > 0) ? inputFile : null;
   const secretType = (inputFile && inputFile.length > 0) ? 2 : 1;
@@ -58,14 +56,19 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
   const shares = secrets.split(kekHex, { shares: numberOfShards, threshold: numberRequired });
   const stringShares = shares.map(share => share.toString('hex'));
 
-  logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
+  logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, verbose);
   reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, region, organizationId, storageKey).then((response) => {
-    logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
+    logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, verbose);
+
     fillShards(response.secretId, response.urls, stringShares, storageKey).then(() => {
-      // logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, true);
+      logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, verbose);
+
       fulfillSecret(response.secretId, storageKey).then(() => {
-        logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
-        let judoFile = new judo.JudoFile({
+        logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, verbose);
+
+        // Create a JSON Object with all the information
+        const jsonObject = {
+          created: new Date().toLocaleString(),
           version: 1,
           type: secretType,
           filename: secretFilename,
@@ -76,15 +79,18 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
           m: numberRequired,
           wrapped_key: encrypedDekObj,
           data: encryptedDataObj
-        });
+        };
+        // Create JudoFile of JSON Object
+        let judoFile = new judo.JudoFile(jsonObject);
+        // Check if judoFile is valid with all the necessary fields
         if (judoFile) {
-          readOutputFile({ outputFile }).then((fileName) => {
-            judoFile.write(fileName);
-          })
+          // If the judoFile is valid, print it to console
+          logger.log(JSON.stringify(jsonObject, null, 4), logger.MESSAGE_TYPE.INFO, true);
         }
+
         // Log the time taken
         const timeTaken = new Date() - startTime;
-        // logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, true)
+        logger.log(`Time taken: ${timeTaken}ms`, logger.MESSAGE_TYPE.INFO, verbose)
       }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));
     }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));
   }).catch(e => logger.log(e, logger.MESSAGE_TYPE.ERROR, true));
