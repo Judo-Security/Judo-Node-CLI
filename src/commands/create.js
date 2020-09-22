@@ -12,7 +12,7 @@ const readOutputFile = require('../utils/helper');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, local }) {
+function create({ storageKey, organizationId, secretName, outputFile, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, region }) {
   const startTime = new Date();
 
   // validate IPs
@@ -58,15 +58,14 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
   const shares = secrets.split(kekHex, { shares: numberOfShards, threshold: numberRequired });
   const stringShares = shares.map(share => share.toString('hex'));
 
-  // logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
-  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, organizationId, storageKey).then((response) => {
-    // logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
+  logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, true);
+  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, region, organizationId, storageKey).then((response) => {
+    logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, true);
     fillShards(response.secretId, response.urls, stringShares, storageKey).then(() => {
       // logger.log(`(${numberOfShards}) secret shards have been uploaded.`, logger.MESSAGE_TYPE.INFO, true);
       fulfillSecret(response.secretId, storageKey).then(() => {
-        // logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
-        const jsonObject = {
-          created: new Date().toLocaleString(),
+        logger.log('Success. Secret has been created.', logger.MESSAGE_TYPE.INFO, true);
+        let judoFile = new judo.JudoFile({
           version: 1,
           type: secretType,
           filename: secretFilename,
@@ -77,16 +76,11 @@ function create({ storageKey, organizationId, secretName, outputFile, input, inp
           m: numberRequired,
           wrapped_key: encrypedDekObj,
           data: encryptedDataObj
-        };
-        let judoFile = new judo.JudoFile(jsonObject);
+        });
         if (judoFile) {
-          const stringifyJudo = JSON.stringify(jsonObject, null, 4);
-          if (local) {
-            readOutputFile({ outputFile }).then((fileName) => {
-              judoFile.write(outputFile);
-            })
-          }
-          logger.log(stringifyJudo, logger.MESSAGE_TYPE.INFO, true);
+          readOutputFile({ outputFile }).then((fileName) => {
+            judoFile.write(fileName);
+          })
         }
         // Log the time taken
         const timeTaken = new Date() - startTime;
