@@ -5,22 +5,15 @@ const logger = require('../utils/logger');
 const judo = require('../judofile');
 const getShards = require('../services/getShards');
 
-function readOutputFile(secretType, outputFile, save) {
+function checkSavePath(secretType, outputFile, save) {
   return new Promise((resolve, reject) => {
-    const path = save ? save + '/' + outputFile : outputFile;
     if (secretType === 2 && outputFile && outputFile.length > 0) {
-      return fs.access(path, fs.constants.F_OK, (err) => {
-        if (err) {
-          // file doesn't exist
-          resolve();
-        } else {
-          if (save) {
-            resolve();
-          } else {
-            reject('File cannot be displayed on STDOUT. Specify location to save the Judo file.');
-          }
-        }
-      });
+      if (save) {
+        resolve();
+      }
+      else {
+        reject('File cannot be displayed on STDOUT. Specify location to save the Judo file.');
+      }
     } else {
       resolve();
     }
@@ -40,7 +33,7 @@ function read({ storageKey, inputFile, save, verbose }) {
   const outputFile = judoFile.filename;
   const secretType = judoFile.type;
   // if we have an outputfile defined, let's see if it already exists.
-  readOutputFile(secretType, outputFile, save).then(() => {
+  checkSavePath(secretType, outputFile, save).then(() => {
     // download the shards
     logger.log('Downloading shards.', logger.MESSAGE_TYPE.INFO, verbose);
     getShards(judoFile.secretId, judoFile.shardUrls, storageKey).then((results) => {
