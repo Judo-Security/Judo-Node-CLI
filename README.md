@@ -61,7 +61,7 @@ Delete an existing Judo secret:
 
 --verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
 
---save                   Location where to save the decrypted Judo File.
+--save                   	Location where to save the decrypted Judo File.
 
 -c "secret name" 		Create judo file.
 
