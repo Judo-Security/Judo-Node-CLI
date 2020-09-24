@@ -112,7 +112,7 @@ rm $FILENAME
 Judo command for creating a secret and piping the output to the above script
 
 ```
-./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+./create.sh <SECRETNAME> <FILE_TYPE> <CONTENT_TO_BE_ENCODED> <NUMBER_OF_SHARDS> <THRESHOLD_SHARDS> <EXPIRY> filename.judo
 ```
 
 Retrieve Judo file from S3:
