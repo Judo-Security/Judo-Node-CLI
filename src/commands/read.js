@@ -4,10 +4,11 @@ const aes256 = require('../aes256gcm');
 const logger = require('../utils/logger');
 const judo = require('../judofile');
 const getShards = require('../services/getShards');
+const constants = require('../utils/constants');
 
 function checkSavePath(secretType, outputFile, save) {
   return new Promise((resolve, reject) => {
-    if (secretType === 2 && outputFile && outputFile.length > 0) {
+    if (secretType === constants.SECRETTYPE.FILE && outputFile && outputFile.length > 0) {
       if (save) {
         resolve();
       }
@@ -48,7 +49,7 @@ function read({ storageKey, inputFile, save, verbose }) {
         const decryptedData = aes256.decrypt(Buffer.from(decryptedDek, 'base64'), judoFile.data);
         const decryptedText = Buffer.from(decryptedData, 'base64');
 
-        if (secretType === 2 && outputFile && outputFile.length > 0) {
+        if (secretType === constants.SECRETTYPE.FILE && outputFile && outputFile.length > 0) {
           const path = save ? save + '/' + outputFile : outputFile;
           // write file
           fs.writeFile(path, decryptedText, function (err) {

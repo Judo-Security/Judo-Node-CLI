@@ -8,6 +8,7 @@ const judo = require('../judofile');
 const reserveSecret = require('../services/reserveSecret');
 const fillShards = require('../services/fillShardsService');
 const fulfillSecret = require('../services/fulfillSecret');
+const constants = require('../utils/constants');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
@@ -28,7 +29,7 @@ function create({ storageKey, organizationId, secretName, input, inputFile, numb
   logger.log(`Creating Judo file`, logger.MESSAGE_TYPE.WARN, verbose);
 
   const secretInputFilename = (inputFile && inputFile.length > 0) ? inputFile : null;
-  const secretType = (inputFile && inputFile.length > 0) ? 2 : 1;
+  const secretType = (inputFile && inputFile.length > 0) ? constants.SECRETTYPE.FILE : constants.SECRETTYPE.TEXT;
 
   // read file
   let secret = input;
