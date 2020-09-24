@@ -64,6 +64,8 @@ Delete an existing Judo secret:
 
 --verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
 
+--save                   	Location where to save the decrypted Judo File.
+
 -c "secret name" 		Create judo file.
 
 -r "input.judo" 		Read judo file.
@@ -84,27 +86,46 @@ Here is a sample shell script demonstrating storage and retrieval of Judo File o
 
 Store Judo file to AWS S3:
 ```
-JUDOFILE=$1
-BUCKETNAME=<your_aws_s3_bucketname>
-FILENAME=$2
-echo $JUDOFILE > $FILENAME
+SECRETNAME=$1
+FILETYPE=$2
+FILETOENCRYPT="$3"
+SHARDS=$4
+THRESHOLD=$5
+EXPIRY=$6
+FILENAME=$7
+
+if [[ $FILETYPE == "file" ]]; then
+  judofile=$(node judo -c $1 --inputfile="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY)
+  else
+  judofile=$(node judo -c $1 --input="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY)
+fi
+
+BUCKETNAME='ajmera-infotech'
+
+echo $judofile > $FILENAME
+
 SENDTOS3=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
+
 rm $FILENAME
 ```
 
 Judo command for creating a secret and piping the output to the above script
 
 ```
-./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+./create.sh <SECRETNAME> <FILE_TYPE> <CONTENT_TO_BE_ENCODED> <NUMBER_OF_SHARDS> <THRESHOLD_SHARDS> <EXPIRY> filename.judo
 ```
 
 Retrieve Judo file from S3:
 ```
-BUCKETNAME=<your_aws_s3-bucketname>
+BUCKETNAME='ajmera-infotech'
 FILENAME=$1
-SAVEFILEAS=$1
-GETFROMS3=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
-more $FILENAME | node judo -r $FILENAME
+SAVEFILEAS=$FILENAME
+SAVETO="$2"
+
+GETFILE=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
+
+more $FILENAME | node judo -r $FILENAME --save="$2"
+
 rm $FILENAME
 ```
 

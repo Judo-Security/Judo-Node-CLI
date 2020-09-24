@@ -22,6 +22,7 @@ const help = '\n \
   --ip="192.168.1.1"\t\tWhite list ip address. Note: to specify more than one IP, use the --ip switch more than once.\n \
   --machine="computer name"\t\tWhite list machine name. Note: to specify more than one machine name, use the --machine switch more than once.\n \
   --verbose\t\t\tDisplay verbose information. Mostly useful when used in conjunction with -r.\n \
+  --save\t\t\tLocation where to save the decrypted Judo File.\n \
   -c "secret name"\t\tCreate judo file.\n \
   -r "input.judo"\t\tRead judo file.\n \
   -n <number>\t\t\tNumber of shards.\n \
