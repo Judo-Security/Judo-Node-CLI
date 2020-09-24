@@ -104,7 +104,7 @@ BUCKETNAME='ajmera-infotech'
 
 echo $judofile > $FILENAME
 
-URL=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
+SENDTOS3=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
 
 rm $FILENAME
 ```
