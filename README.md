@@ -23,12 +23,9 @@ npm install -g @judosecurity/judo-node-client
 - Download your client configuration and copy the client.json into the CLI directory.
 
 ### Client Connection Setup
-This current version is setup to use `https://staging.judosecurity.com` service endpoints.
+This current version is setup to use `https://beta.judosecurity.com` service endpoints.
 
-If you need to configure the client to use a different endpoint you can either
-- Edit the `services.json` file located in your judo-node-client NPM installation location.
-*or*
-- Create your own `.json` config file and use it using the `--config="client.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl": "https://staging.judosecurity.com"}`
+If you need to configure the client to use a different endpoint you can create your own `.json` config file and use it using the `--config="service.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl": "https://beta.judosecurity.com"}`
 
 ### Usage
 You can issue the command `judo` to see how to use the client. Here is an overview:
