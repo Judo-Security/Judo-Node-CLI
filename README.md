@@ -76,7 +76,7 @@ Delete an existing Judo secret:
 
 **On secret retrieval, the decrypted Judo file output would be displayed on the STDOUT which user can pipe to any file.**
 
-Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>AWS S3 bucket.</u>
 
 
 Store Judo file to AWS S3:
@@ -92,7 +92,7 @@ rm $FILENAME
 Judo command for creating a secret and piping the output to the above script
 
 ```
-./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+./script.sh "$(judo -c "name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
 Retrieve Judo file from S3:
@@ -110,10 +110,10 @@ Command to be executed to retrieve a secret
 ./script.sh filename.judo
 ```
 
-Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure blob container.
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>Azure Blob Storage Service.</u>
 
 
-Store Judo file to Azure blob:
+Store Judo file to Azure blob container:
 ```
 JUDOFILE=$1
 ACCOUNTNAME=<your_azure_account_name>
@@ -121,24 +121,24 @@ ACCOUTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$2
 echo $JUDOFILE > $FILENAME
-SENDTOS3=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 rm $FILENAME
 ```
 
 Judo command for creating a secret and piping the output to the above script
 
 ```
-./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
-Retrieve Judo file from Azure blob conatiner:
+Retrieve Judo file from Azure blob container:
 ```
 ACCOUNTNAME=<your_azure_account_name>
 ACCOUTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$1
 SAVEFILEAS=$1
-GETFROMS3=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 more $FILENAME | node judo -r $FILENAME
 rm $FILENAME
 ```
