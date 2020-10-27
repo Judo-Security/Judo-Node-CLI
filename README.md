@@ -23,12 +23,9 @@ npm install -g @judosecurity/judo-node-client
 - Download your client configuration and copy the client.json into the CLI directory.
 
 ### Client Connection Setup
-This current version is setup to use `https://staging.judosecurity.com` service endpoints.
+This current version is setup to use `https://beta.judosecurity.com` service endpoints.
 
-If you need to configure the client to use a different endpoint you can either
-- Edit the `services.json` file located in your judo-node-client NPM installation location.
-*or*
-- Create your own `.json` config file and use it using the `--config="client.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl": "https://staging.judosecurity.com"}`
+If you need to configure the client to use a different endpoint you can create your own `.json` config file and use it using the `--config="service.json"` flag when executing the Judo client. The content of the file should be a json object that looks like: `{"serviceUrl": "https://beta.judosecurity.com"}`
 
 ### Usage
 You can issue the command `judo` to see how to use the client. Here is an overview:
@@ -79,7 +76,7 @@ Delete an existing Judo secret:
 
 **On secret retrieval, the decrypted Judo file output would be displayed on the STDOUT which user can pipe to any file.**
 
-Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>AWS S3 bucket.</u>
 
 
 Store Judo file to AWS S3:
@@ -95,7 +92,7 @@ rm $FILENAME
 Judo command for creating a secret and piping the output to the above script
 
 ```
-./script.sh "$(judo -c "name" --input="text" -n5 -m3 -e0)" filename.judo
+./script.sh "$(judo -c "name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
 Retrieve Judo file from S3:
@@ -112,6 +109,45 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
+
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>Azure Blob Storage Service.</u>
+
+
+Store Judo file to Azure blob container:
+```
+JUDOFILE=$1
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from Azure blob container:
+```
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$1
+SAVEFILEAS=$1
+GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+more $FILENAME | node judo -r $FILENAME
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
+```
+
 ### Client removal
 ```
 npm uninstall -g @judosecurity/judo-node-client
