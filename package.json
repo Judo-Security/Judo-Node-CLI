@@ -1,6 +1,6 @@
 {
   "name": "@judosecurity/judo-node-client",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "Node CLI client for Judo Security",
   "main": "judo.js",
   "bin": {

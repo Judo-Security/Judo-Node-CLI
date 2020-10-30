@@ -76,7 +76,7 @@ Delete an existing Judo secret:
 
 **On secret retrieval, the decrypted Judo file output would be displayed on the STDOUT which user can pipe to any file.**
 
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>AWS S3 bucket.</u>
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
 
 
 Store Judo file to AWS S3:
@@ -110,18 +110,18 @@ Command to be executed to retrieve a secret
 ./script.sh filename.judo
 ```
 
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on <u>Azure Blob Storage Service.</u>
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
 
 
 Store Judo file to Azure blob container:
 ```
 JUDOFILE=$1
 ACCOUNTNAME=<your_azure_account_name>
-ACCOUTKEY=<your_azure_account_key>
+ACCOUNTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$2
 echo $JUDOFILE > $FILENAME
-SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 rm $FILENAME
 ```
 
@@ -134,11 +134,11 @@ Judo command for creating a secret and piping the output to the above script
 Retrieve Judo file from Azure blob container:
 ```
 ACCOUNTNAME=<your_azure_account_name>
-ACCOUTKEY=<your_azure_account_key>
+ACCOUNTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$1
 SAVEFILEAS=$1
-GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 more $FILENAME | node judo -r $FILENAME
 rm $FILENAME
 ```
