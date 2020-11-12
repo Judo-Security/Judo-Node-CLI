@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@judosecurity/judo-client-library": "^0.2.0",
     "jsonwebtoken": "8.5.1",
     "minimist": "^1.2.0",
     "node-fetch": "2.6.0",

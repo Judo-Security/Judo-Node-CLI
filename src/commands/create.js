@@ -9,22 +9,33 @@ const reserveSecret = require('../services/reserveSecret');
 const fillShards = require('../services/fillShardsService');
 const fulfillSecret = require('../services/fulfillSecret');
 const constants = require('../utils/constants');
+const { IPAddress } = require('@judosecurity/judo-client-library');
 
 const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-function create({ storageKey, organizationId, secretName, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, machineNames, region, verbose }) {
+function create({ storageKey, organizationId, secretName, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, deniedIPs, machineNames, region, verbose }) {
   const startTime = new Date();
 
   // validate IPs
   let allIPsAreValid = true;
-  for (let i = 0; i < allowedIPs.length; i++) {
-    const ip = allowedIPs[i].toString();
-    const valid = ipAddressValidation.test(ip);
-    if (!valid) {
-      logger.log(`${ip} is not a valid IP Address.`, logger.MESSAGE_TYPE.ERROR, true);
-      allIPsAreValid = false;
+  function isValidIP(arrayOfIPs) {
+    for (let i = 0; i < arrayOfIPs.length; i++) {
+      const checkIP = new IPAddress(arrayOfIPs[i]);
+      if (!checkIP.isValidIPAddress()) {
+        logger.log(`${checkIP.getIPAddress()} is not a valid IP Address.`, logger.MESSAGE_TYPE.ERROR, true);
+        allIPsAreValid = false;
+      }
     }
   }
+
+  if (allowedIPs) {
+    isValidIP(allowedIPs);
+  }
+
+  if (deniedIPs) {
+    isValidIP(deniedIPs);
+  }
+
   if (!allIPsAreValid) return;
   logger.log(`Creating Judo file`, logger.MESSAGE_TYPE.WARN, verbose);
 
@@ -58,7 +69,7 @@ function create({ storageKey, organizationId, secretName, input, inputFile, numb
   const stringShares = shares.map(share => share.toString('hex'));
 
   logger.log('Creating a new secret.', logger.MESSAGE_TYPE.WARN, verbose);
-  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, machineNames, region, organizationId, storageKey).then((response) => {
+  reserveSecret(secretName, numberOfShards, expiration, allowedIPs, deniedIPs, machineNames, region, organizationId, storageKey).then((response) => {
     logger.log(`(${numberOfShards}) secret shards have been reserved.`, logger.MESSAGE_TYPE.INFO, verbose);
 
     fillShards(response.secretId, response.urls, stringShares, storageKey).then(() => {
