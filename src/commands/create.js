@@ -11,6 +11,8 @@ const fulfillSecret = require('../services/fulfillSecret');
 const constants = require('../utils/constants');
 const { IPAddress } = require('@judosecurity/judo-client-library');
 
+const ipAddressValidation = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
 function create({ storageKey, organizationId, secretName, input, inputFile, numberOfShards, numberRequired, expiration, allowedIPs, deniedIPs, machineNames, region, verbose }) {
   const startTime = new Date();
 
