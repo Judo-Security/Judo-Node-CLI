@@ -10,7 +10,7 @@ const Expire = require('./src/commands/expire');
 const Delete = require('./src/commands/delete');
 
 const args = parseArgs(process.argv.slice(2), {
-  string: ['c', 'r', 'input', 'inputfile', 'ip', 'machine'],
+  string: ['c', 'r', 'input', 'inputfile', 'ip', 'ipdeny', 'machine'],
   boolean: ['verbose']
 });
 
@@ -32,6 +32,8 @@ if (create) {
   const expiration = args.e || 0;
   const ipArgs = args.ip;
   const allowedIPs = ipArgs && ((typeof ipArgs === 'string') ? [ipArgs] : ipArgs) || [];
+  const ipDenyArgs = args.ipdeny;
+  const deniedIPs = ipDenyArgs && ((typeof ipDenyArgs === 'string') ? [ipDenyArgs] : ipDenyArgs) || [];
   const machineArgs = args.machine;
   const machineNames = machineArgs && ((typeof machineArgs === 'string') ? [machineArgs] : machineArgs) || [];
   const region = {};
@@ -54,6 +56,7 @@ if (create) {
     numberRequired,
     expiration,
     allowedIPs,
+    deniedIPs,
     machineNames,
     region,
     verbose

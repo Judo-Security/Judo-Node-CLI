@@ -5,13 +5,14 @@ const urls = config('services');
 
 const reserveUrl = '/services/organization/<!organizationid!>/CreateSecret';
 
-function reserveSecret(name, numberOfShards, expiresIn, allowedIPs, machineNames, region, organizationId, token) {
+function reserveSecret(name, numberOfShards, expiresIn, allowedIPs, deniedIPs, machineNames, region, organizationId, token) {
   const url = reserveUrl.replace('<!organizationid!>', organizationId);
   const postBody = {
     description: name,
     numberOfShards: numberOfShards,
     expiresIn: expiresIn,
     allowedIPs,
+    deniedIPs,
     machineNames,
     region
   };
