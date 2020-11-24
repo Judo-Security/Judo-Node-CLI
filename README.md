@@ -55,7 +55,9 @@ Delete an existing Judo secret:
 
 --inputfile=<filename> 		Secret file to be secured.
 
---ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
+--ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once. For range of IP's use CIDR block.
+
+--ipdeny="192.168.1.1" 		Black list ip address. Note: to specify more than one IP, use the --ipdeny switch more than once. For range of IP's use CIDR block.
 
 --machine="computer name" 	White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
 
@@ -101,6 +103,44 @@ BUCKETNAME=<your_aws_s3-bucketname>
 FILENAME=$1
 SAVEFILEAS=$1
 GETFROMS3=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
+more $FILENAME | node judo -r $FILENAME
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
+```
+
+<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
+
+
+Store Judo file to Azure blob container:
+```
+JUDOFILE=$1
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from Azure blob container:
+```
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$1
+SAVEFILEAS=$1
+GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 more $FILENAME | node judo -r $FILENAME
 rm $FILENAME
 ```
