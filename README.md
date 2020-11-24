@@ -55,7 +55,9 @@ Delete an existing Judo secret:
 
 --inputfile=<filename> 		Secret file to be secured.
 
---ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once.
+--ip="192.168.1.1" 		White list ip address. Note: to specify more than one IP, use the --ip switch more than once. For range of IP's use CIDR block.
+
+--ipdeny="192.168.1.1" 		Black list ip address. Note: to specify more than one IP, use the --ipdeny switch more than once. For range of IP's use CIDR block.
 
 --machine="computer name" 	White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
 
