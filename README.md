@@ -78,7 +78,9 @@ Delete an existing Judo secret:
 
 **On secret retrieval, the decrypted Judo file output would be displayed on the STDOUT which user can pipe to any file.**
 
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
+### Judo File Management
+#### AWS S3
+Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
 
 
 Store Judo file to AWS S3:
@@ -112,7 +114,9 @@ Command to be executed to retrieve a secret
 ./script.sh filename.judo
 ```
 
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
+#### Azure Blob Storage
+
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
 
 
 Store Judo file to Azure blob container:
@@ -149,19 +153,18 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
+#### Google Cloud Storage
 
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Google Cloud Storage.
 
 
-Store Judo file to Azure blob container:
+Store Judo file to Google Cloud Storage:
 ```
+BUCKETNAME=<bucket_name_of_storage_account>
 JUDOFILE=$1
-ACCOUNTNAME=<your_azure_account_name>
-ACCOUNTKEY=<your_azure_account_key>
-CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$2
 echo $JUDOFILE > $FILENAME
-SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+SENDTOS3=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
 rm $FILENAME
 ```
 
@@ -171,14 +174,12 @@ Judo command for creating a secret and piping the output to the above script
 ./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
-Retrieve Judo file from Azure blob container:
-```
-ACCOUNTNAME=<your_azure_account_name>
-ACCOUNTKEY=<your_azure_account_key>
-CONTAINERNAME=<your_azure_blob_container>
+Retrieve Judo file from Google Cloud Storage:
+```kaam
+BUCKETNAME=<bucket_name_of_storage_account>
 FILENAME=$1
 SAVEFILEAS=$1
-GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+GETFROMS3=$(gsutil cp gs://$BUCKETNAME/$FILENAME $SAVEFILEAS)
 more $FILENAME | node judo -r $FILENAME
 rm $FILENAME
 ```
@@ -187,6 +188,8 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
+
+In all alternives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
 
 ### Client removal
 ```
