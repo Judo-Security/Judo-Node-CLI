@@ -113,11 +113,8 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
-
 #### Azure Blob Storage
-
 Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
-
 
 Store Judo file to Azure blob container:
 ```
@@ -175,7 +172,7 @@ Judo command for creating a secret and piping the output to the above script
 ```
 
 Retrieve Judo file from Google Cloud Storage:
-```kaam
+```
 BUCKETNAME=<bucket_name_of_storage_account>
 FILENAME=$1
 SAVEFILEAS=$1
@@ -189,7 +186,8 @@ Command to be executed to retrieve a secret
 ./script.sh filename.judo
 ```
 
-In all alternives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
+In all alternatives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
+
 
 ### Client removal
 ```
