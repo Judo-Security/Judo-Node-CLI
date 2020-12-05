@@ -61,6 +61,8 @@ Delete an existing Judo secret:
 
 --machine="computer name" 	White list machine name. Note: to specify more than one machine name, use the --machine switch more than once.
 
+--save="/home"			Location where to save the decrypted Judo file
+
 --verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
 
 -c "secret name" 		Create judo file.
@@ -103,9 +105,10 @@ Retrieve Judo file from S3:
 ```
 BUCKETNAME=<your_aws_s3-bucketname>
 FILENAME=$1
-SAVEFILEAS=$1
+SAVEFILEAS=$FILENAME
+SAVETO="$2"
 GETFROMS3=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
-more $FILENAME | node judo -r $FILENAME
+more $FILENAME | node judo -r $FILENAME --save="$2"
 rm $FILENAME
 ```
 
@@ -140,9 +143,10 @@ ACCOUNTNAME=<your_azure_account_name>
 ACCOUNTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$1
-SAVEFILEAS=$1
+SAVEFILEAS=$FILENAME
+SAVETO="$2"
 GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
-more $FILENAME | node judo -r $FILENAME
+more $FILENAME | node judo -r $FILENAME --save="$2"
 rm $FILENAME
 ```
 
@@ -161,7 +165,7 @@ BUCKETNAME=<bucket_name_of_storage_account>
 JUDOFILE=$1
 FILENAME=$2
 echo $JUDOFILE > $FILENAME
-SENDTOS3=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
+SENDTOGCP=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
 rm $FILENAME
 ```
 
@@ -174,10 +178,10 @@ Judo command for creating a secret and piping the output to the above script
 Retrieve Judo file from Google Cloud Storage:
 ```
 BUCKETNAME=<bucket_name_of_storage_account>
-FILENAME=$1
-SAVEFILEAS=$1
-GETFROMS3=$(gsutil cp gs://$BUCKETNAME/$FILENAME $SAVEFILEAS)
-more $FILENAME | node judo -r $FILENAME
+FILENAME="$1"
+SAVETO="$2"
+GETFROMGCP=$(gsutil cp gs://$BUCKETNAME/$FILENAME $FILENAME)
+more $FILENAME | node judo -r $FILENAME --save=$2
 rm $FILENAME
 ```
 
