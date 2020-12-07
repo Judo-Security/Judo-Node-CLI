@@ -116,9 +116,8 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
-
-<br>Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
-
+#### Azure Blob Storage
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
 
 Store Judo file to Azure blob container:
 ```
@@ -144,9 +143,45 @@ ACCOUNTNAME=<your_azure_account_name>
 ACCOUNTKEY=<your_azure_account_key>
 CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$1
-SAVEFILEAS=$1
+SAVEFILEAS=$FILENAME
+SAVETO="$2"
 GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
-more $FILENAME | node judo -r $FILENAME
+more $FILENAME | node judo -r $FILENAME --save="$2"
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
+```
+#### Google Cloud Storage
+
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Google Cloud Storage.
+
+
+Store Judo file to Google Cloud Storage:
+```
+BUCKETNAME=<bucket_name_of_storage_account>
+JUDOFILE=$1
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOGCP=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from Google Cloud Storage:
+```
+BUCKETNAME=<bucket_name_of_storage_account>
+FILENAME="$1"
+SAVETO="$2"
+GETFROMGCP=$(gsutil cp gs://$BUCKETNAME/$FILENAME $FILENAME)
+more $FILENAME | node judo -r $FILENAME --save=$2
 rm $FILENAME
 ```
 
@@ -227,6 +262,9 @@ Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
+
+In all alternatives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
+
 
 In all alternatives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
 
