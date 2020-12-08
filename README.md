@@ -65,8 +65,6 @@ Delete an existing Judo secret:
 
 --verbose 			Display verbose information. Mostly useful when used in conjunction with -r.
 
---save                   	Location where to save the decrypted Judo File.
-
 -c "secret name" 		Create judo file.
 
 -r "input.judo" 		Read judo file.
@@ -87,209 +85,189 @@ Delete an existing Judo secret:
 Here is a sample shell script demonstrating storage and retrieval of Judo File on AWS S3 bucket.
 
 
-##### Store Judo file to AWS S3:
+Store Judo file to AWS S3:
 ```
-SECRETNAME=$1
-FILETYPE=$2
-FILETOENCRYPT="$3"
-SHARDS=$4
-THRESHOLD=$5
-EXPIRY=$6
-FILENAME=$7
-
-if [[ $FILETYPE == "file" ]]; then
-  judofile=$(judo -c $1 --inputfile="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY --machine=<machine_name>)
-  else
-  judofile=$(judo -c $1 --input="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY)
-fi
-
+JUDOFILE=$1
 BUCKETNAME=<your_aws_s3_bucketname>
-
-echo $judofile | jq '.' > $FILENAME
-
-URL=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
-
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOS3=$(aws s3api put-object --bucket $BUCKETNAME --key $FILENAME --body $FILENAME)
 rm $FILENAME
 ```
 
 Judo command for creating a secret and piping the output to the above script
 
-To create secret of Text type:
 ```
-./script.sh "<secret_name>" text <secret_text_to_be_encrypted> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob text XQc123 5 3 0 bob.judo
-```
-To create secret of File type:
-```
-./script.sh "<secret_name>" file <file_path> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob file "/mnt/c/Users/Bob/file.pdf" 5 3 0 bob.judo
+./script.sh "$(judo -c "name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
-##### Retrieve Judo file from S3:
+Retrieve Judo file from S3:
 ```
-BUCKETNAME=<your_aws_s3_bucketname>
+BUCKETNAME=<your_aws_s3-bucketname>
 FILENAME=$1
 SAVEFILEAS=$FILENAME
 SAVETO="$2"
 GETFROMS3=$(aws s3api get-object --bucket $BUCKETNAME --key $FILENAME $SAVEFILEAS)
-more $FILENAME | judo -r $FILENAME --save="$2"
+more $FILENAME | node judo -r $FILENAME --save="$2"
 rm $FILENAME
 ```
 
-Command to be executed to retrieve a secret:
-
-To retrieve secret of Text type:
+Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
-
-To retrieve secret of File type:
-```
-./script.sh filename.judo <path_to_save_decrypted_secret>
-./script.sh filename.judo "/mnt/c/Users"
-```
-
 #### Azure Blob Storage
 Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
 
-##### Store Judo file to Azure blob container:
+Store Judo file to Azure blob container:
 ```
-SECRETNAME=$1
-FILETYPE=$2
-FILETOENCRYPT="$3"
-SHARDS=$4
-THRESHOLD=$5
-EXPIRY=$6
-FILENAME=$7
-
-if [[ $FILETYPE == "file" ]]; then
-  judofile=$(judo -c $1 --inputfile="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY --machine=<machine_name>)
-  else
-  judofile=$(judo -c $1 --input="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY)
-fi
-
-ACCOUNTNAME=<account_name>
-ACCOUTKEY=<account_key>
-CONTAINERNAME=<container_name>
-
-
-echo $judofile | jq '.' > $FILENAME
-
-URL=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
-
+JUDOFILE=$1
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
 rm $FILENAME
 ```
 
-Judo command for creating a secret and piping the output to the above script:
+Judo command for creating a secret and piping the output to the above script
 
-To create secret of Text type:
 ```
-./script.sh "<secret_name>" text <secret_text_to_be_encrypted> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob text XQc123 5 3 0 bob.judo
-```
-To create secret of File type:
-```
-./script.sh "<secret_name>" file <file_path> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob file "/mnt/c/Users/Bob/file.pdf" 5 3 0 bob.judo
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
-
-##### Retrieve Judo file from Azure blob container:
+Retrieve Judo file from Azure blob container:
 ```
-ACCOUNTNAME=<account_name>
-ACCOUTKEY=<account_key>
-CONTAINERNAME=<container_name>
-
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
 FILENAME=$1
 SAVEFILEAS=$FILENAME
 SAVETO="$2"
 GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
-more $FILENAME | judo -r $FILENAME --save="$2"
+more $FILENAME | node judo -r $FILENAME --save="$2"
 rm $FILENAME
 ```
 
-Command to be executed to retrieve a secret:
-
-Text type:
+Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
+#### Google Cloud Storage
 
-File type:
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Google Cloud Storage.
+
+
+Store Judo file to Google Cloud Storage:
 ```
-./script.sh filename.judo <path_to_save_decrypted_secret>
-./script.sh filename.judo "/mnt/c/Users"
-```
-
-#### Google Cloud Platform
-
-Here is a sample shell script demonstrating storage and retrieval of Judo File on Google Cloud Platform.
-
-
-##### Store Judo file to Google Cloud Platform:
-```
-SECRETNAME=$1
-FILETYPE=$2
-FILETOENCRYPT="$3"
-SHARDS=$4
-THRESHOLD=$5
-EXPIRY=$6
-FILENAME=$7
-
-if [[ $FILETYPE == "file" ]]; then
-  judofile=$(judo -c $1 --inputfile="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY --machine=<machine_name>)
-  else
-  judofile=$(judo -c $1 --input="$FILETOENCRYPT" -n$SHARDS -m$THRESHOLD -e$EXPIRY)
-fi
-
 BUCKETNAME=<bucket_name_of_storage_account>
-
-echo $judofile | jq '.' > $FILENAME
+JUDOFILE=$1
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
 SENDTOGCP=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
 rm $FILENAME
 ```
 
-Judo command for creating a secret and piping the output to the above script:
+Judo command for creating a secret and piping the output to the above script
 
-To create secret of Text type:
 ```
-./script.sh "<secret_name>" text <secret_text_to_be_encrypted> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob text XQc123 5 3 0 bob.judo
-```
-To create secret of File type:
-```
-./script.sh "<secret_name>" file <file_path> <number_of_shards> <minimum_shards> <expiry> filename.judo
-
-./script.sh Bob file "/mnt/c/Users/Bob/file.pdf" 5 3 0 bob.judo
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
 ```
 
-##### Retrieve Judo file from Google Cloud Platform:
+Retrieve Judo file from Google Cloud Storage:
 ```
 BUCKETNAME=<bucket_name_of_storage_account>
 FILENAME="$1"
 SAVETO="$2"
 GETFROMGCP=$(gsutil cp gs://$BUCKETNAME/$FILENAME $FILENAME)
-more $FILENAME | judo -r $FILENAME --save="$2"
+more $FILENAME | node judo -r $FILENAME --save=$2
 rm $FILENAME
 ```
 
-Command to be executed to retrieve a secret:
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
+```
+#### Azure Blob Storage
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Azure Blob Storage Service.
 
-Text type:
+Store Judo file to Azure blob container:
+```
+JUDOFILE=$1
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOBLOB=$(az storage blob upload --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from Azure blob container:
+```
+ACCOUNTNAME=<your_azure_account_name>
+ACCOUNTKEY=<your_azure_account_key>
+CONTAINERNAME=<your_azure_blob_container>
+FILENAME=$1
+SAVEFILEAS=$FILENAME
+SAVETO="$2"
+GETFROMBLOB=$(az storage blob download --account-name $ACCOUNTNAME --account-key $ACCOUNTKEY --container-name $CONTAINERNAME --file $FILENAME --name $FILENAME)
+more $FILENAME | node judo -r $FILENAME --save="$2"
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
+```
+./script.sh filename.judo
+```
+#### Google Cloud Storage
+
+Here is a sample shell script demonstrating storage and retrieval of Judo File on Google Cloud Storage.
+
+
+Store Judo file to Google Cloud Storage:
+```
+BUCKETNAME=<bucket_name_of_storage_account>
+JUDOFILE=$1
+FILENAME=$2
+echo $JUDOFILE > $FILENAME
+SENDTOGCP=$(gsutil cp $FILENAME gs://$BUCKETNAME/)
+rm $FILENAME
+```
+
+Judo command for creating a secret and piping the output to the above script
+
+```
+./script.sh "$(judo -c "secret_name" --input="text_to_be_encrypted" -n5 -m3 -e0)" filename.judo
+```
+
+Retrieve Judo file from Google Cloud Storage:
+```
+BUCKETNAME=<bucket_name_of_storage_account>
+FILENAME="$1"
+SAVETO="$2"
+GETFROMGCP=$(gsutil cp gs://$BUCKETNAME/$FILENAME $FILENAME)
+more $FILENAME | node judo -r $FILENAME --save=$2
+rm $FILENAME
+```
+
+Command to be executed to retrieve a secret
 ```
 ./script.sh filename.judo
 ```
 
-File type:
-```
-./script.sh filename.judo <path_to_save_decrypted_secret>
-./script.sh filename.judo "/mnt/c/Users"
-```
+In all alternatives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
+
+
+In all alternatives described above to store Judo file in cloud, it is assumed that the user has the appropriate SDK/CLI tool of the cloud provider set up in their system.
+
 
 ### Client removal
 ```
